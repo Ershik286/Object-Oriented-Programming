@@ -61,6 +61,22 @@ public class TechnicService {
         _dbContext = dbContext;
     }
 
+    public void Update(Technic technic) {
+        _dbContext.Technics.Update(technic);
+        _dbContext.SaveChanges();
+    }
+
+    public void Delete(int id) {
+        var technic = _dbContext.Technics.Find(id);
+        if (technic != null) {
+            _dbContext.Technics.Remove(technic);
+            _dbContext.SaveChanges();
+        }
+    }
+
+    public int GetCount() {
+        return _dbContext.Technics.Count();
+    }
     public List<Technic> GetAll() {
         return _dbContext.Technics.ToList();
     }
@@ -92,6 +108,19 @@ public class TechnicService {
                 TechnicCountry = c.Technic.Country
             })
             .ToList<object>();
+    }
+
+    public List<object> GetSmartfonList() {
+        return _dbContext.Smartfons
+                    .Include(c => c.Technic)
+                    .Select(c => new {
+                        c.Id,
+                        c.CameraMP,
+                        c.Manufactures,
+                        TechnicName = c.Technic.Name,
+                        TechnicCountry = c.Technic.Country
+                    })
+                    .ToList<object>();
     }
 
     public List<Technic> GetByRawSql(string country) {
