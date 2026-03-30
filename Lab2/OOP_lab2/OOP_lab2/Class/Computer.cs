@@ -6,13 +6,10 @@ namespace OOP_lab2.Class {
         public string ModelProcessor { get; set; }
         public int Ram { get; set; }
 
-        public int? TechnicId { get; set; }
-
-        public virtual Technic Technic { get; set; }
-
         public Computer() : base() {
             ModelProcessor = "intel";
             Ram = 4;
+            //TechnicId = 0; //SQL запрос для определения id
         }
 
         public Computer(string modelProcessor, int ram, string name, int id) : base(name, id) {

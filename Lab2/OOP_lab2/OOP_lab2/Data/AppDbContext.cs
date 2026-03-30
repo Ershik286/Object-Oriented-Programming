@@ -1,12 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OOP_lab2.Class;
+using System.Collections;
 
 public class AppDbContext : DbContext {
     public DbSet<Technic> Technics { get; set; }
     public DbSet<Computer> Computers { get; set; }
     public DbSet<Smartfon> Smartfons { get; set; }
 
-    public const string connectionString = "Host=localhost;Port=5432;Database=Technics;Username=Ershik286;Password=CyberBiba227";
+    public const string connectionString = "Host=localhost;Port=5432;Database=Technics;Username=Ershik286;Password=CyberBiba227;Include Error Detail=true";
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {
     }
@@ -20,38 +21,36 @@ public class AppDbContext : DbContext {
         }
     }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder) {
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        // Настройка Technic
         modelBuilder.Entity<Technic>(entity => {
             entity.ToTable("Technics");
             entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).UseIdentityAlwaysColumn();
             entity.Property(e => e.Name).IsRequired();
             entity.Property(e => e.Country).IsRequired();
+            entity.Property(e => e.Enabled);
         });
 
+        // Настройка Computer для TPT
         modelBuilder.Entity<Computer>(entity => {
             entity.ToTable("Computers");
-
+            // Указываем, что Computer наследует Technic через Id
             entity.HasBaseType<Technic>();
 
             entity.Property(e => e.ModelProcessor).IsRequired();
             entity.Property(e => e.Ram).IsRequired();
-
-            entity.HasOne(e => e.Technic)
-                .WithOne()
-                .HasForeignKey<Computer>(e => e.Id);
         });
 
+        // Настройка Smartfon для TPT
         modelBuilder.Entity<Smartfon>(entity => {
             entity.ToTable("Smartfons");
-
             entity.HasBaseType<Technic>();
 
             entity.Property(e => e.CameraMP).IsRequired();
             entity.Property(e => e.Manufactures).IsRequired();
-
-            entity.HasOne(e => e.Technic)
-                .WithOne()
-                .HasForeignKey<Smartfon>(e => e.Id);
+            entity.Property(e => e.IsCall);
         });
     }
 }
@@ -90,37 +89,53 @@ public class TechnicService {
         _dbContext.SaveChanges();
     }
 
-    public void CreateWithComputer(Technic technic, Computer computer) {
-        computer.Technic = technic;
-        _dbContext.Technics.Add(technic);
+    public void CreateComputer(Computer computer)
+    {
+        Console.WriteLine($"CreateComputer: {computer.Name}, {computer.ModelProcessor}");
+
+        computer.Id = 0;
         _dbContext.Computers.Add(computer);
         _dbContext.SaveChanges();
+
+        Console.WriteLine($"Created with ID: {computer.Id}");
     }
 
-    public List<object> GetComputersWithDetails() {
+    public void CreateSmartfon(Smartfon smartfon)
+    {
+        Console.WriteLine($"CreateSmartfon: {smartfon.Name}, {smartfon.Manufactures}");
+
+        smartfon.Id = 0;
+
+        _dbContext.Smartfons.Add(smartfon);
+        _dbContext.SaveChanges();
+
+        Console.WriteLine($"Created with ID: {smartfon.Id}");
+    }
+
+    public List<object> GetComputersWithDetails()
+    {
         return _dbContext.Computers
-            .Include(c => c.Technic)
             .Select(c => new {
                 c.Id,
                 c.ModelProcessor,
                 c.Ram,
-                TechnicName = c.Technic.Name,
-                TechnicCountry = c.Technic.Country
+                TechnicName = c.Name,      
+                TechnicCountry = c.Country 
             })
             .ToList<object>();
     }
 
-    public List<object> GetSmartfonList() {
+    public List<object> GetSmartfonList()
+    {
         return _dbContext.Smartfons
-                    .Include(c => c.Technic)
-                    .Select(c => new {
-                        c.Id,
-                        c.CameraMP,
-                        c.Manufactures,
-                        TechnicName = c.Technic.Name,
-                        TechnicCountry = c.Technic.Country
-                    })
-                    .ToList<object>();
+            .Select(c => new {
+                c.Id,
+                c.CameraMP,
+                c.Manufactures,
+                TechnicName = c.Name,      
+                TechnicCountry = c.Country
+            })
+            .ToList<object>();
     }
 
     public List<Technic> GetByRawSql(string country) {

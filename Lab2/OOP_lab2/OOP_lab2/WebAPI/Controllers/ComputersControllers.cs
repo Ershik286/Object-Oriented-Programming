@@ -35,26 +35,45 @@ namespace OOP_lab2.WebAPI.Controllers {
             return Ok(computer);
         }
 
-        // POST: api/computers
         [HttpPost]
-        public IActionResult Create([FromBody] Computer computer) {
-            if (computer == null) {
-                return BadRequest("Данные компьютера не могут быть пустыми");
+        public IActionResult Create([FromBody] Computer computer)
+        {
+            //Console.WriteLine("=== POST COMPUTER START ===");
+            //Console.WriteLine($"Request received at: {DateTime.Now}");
+
+            //// Логируем полученные данные
+            if (computer == null){
+                computer = new Computer();
             }
 
-            try {
-                // Создаем базовую запись Technic и Computer
-                var technic = new Technic {
-                    Id = computer.Id,
-                    Name = computer.Name,
-                    Country = computer.Country,
-                    Enabled = computer.Enabled
-                };
+            //Console.WriteLine($"Computer data:");
+            //Console.WriteLine($"  Name: {computer.Name}");
+            //Console.WriteLine($"  Country: {computer.Country}");
+            //Console.WriteLine($"  Enabled: {computer.Enabled}");
+            //Console.WriteLine($"  ModelProcessor: {computer.ModelProcessor}");
+            //Console.WriteLine($"  Ram: {computer.Ram}");
+            //Console.WriteLine($"  Id: {computer.Id}");
 
-                _technicService.CreateWithComputer(technic, computer);
+            try{
+                // Валидация обязательных полей
+                if (string.IsNullOrEmpty(computer.Name)){
+                    Console.WriteLine("ERROR: Name is required");
+                    return BadRequest("Name is required");
+                }
+
+                if (string.IsNullOrEmpty(computer.ModelProcessor)){
+                    Console.WriteLine("ERROR: ModelProcessor is required");
+                    return BadRequest("ModelProcessor is required");
+                }
+
+                _technicService.CreateComputer(computer);
+                Console.WriteLine($"Computer created successfully with ID: {computer.Id}");
                 return CreatedAtAction(nameof(GetById), new { id = computer.Id }, computer);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
+                Console.WriteLine($"EXCEPTION: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return BadRequest($"Ошибка при создании компьютера: {ex.Message}");
             }
         }
@@ -62,6 +81,8 @@ namespace OOP_lab2.WebAPI.Controllers {
         // DELETE: api/computers/{id}
         [HttpDelete("{id}")]
         public IActionResult Delete(int id) {
+            Console.WriteLine("Delete Controller in Computer sound");
+
             try {
                 // Сначала удаляем Computer, потом Technic
                 var computer = _technicService.GetComputersWithDetails()
@@ -74,8 +95,7 @@ namespace OOP_lab2.WebAPI.Controllers {
                     return NotFound($"Компьютер с ID {id} не найден");
                 }
 
-                // В вашей реализации может быть специальный метод для удаления
-                // _technicService.DeleteComputer(id);
+                _technicService.Delete(id);
 
                 return NoContent();
             }

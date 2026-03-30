@@ -39,23 +39,11 @@ namespace OOP_lab2.WebAPI.Controllers {
         [HttpPost]
         public IActionResult Create([FromBody] Smartfon smartfon) {
             if (smartfon == null) {
-                return BadRequest("Данные смартфона не могут быть пустыми");
+                smartfon = new Smartfon();
             }
 
             try {
-                // Создаем базовую запись Technic
-                var technic = new Technic {
-                    Id = smartfon.Id,
-                    Name = smartfon.Name,
-                    Country = smartfon.Country,
-                    Enabled = smartfon.Enabled
-                };
-
-                // В вашем сервисе нужно добавить метод CreateWithSmartfon
-                // _technicService.CreateWithSmartfon(technic, smartfon);
-
-                // Пока используем существующий метод
-                _technicService.Create(technic);
+                _technicService.CreateSmartfon(smartfon);
 
                 return CreatedAtAction(nameof(GetById), new { id = smartfon.Id }, smartfon);
             }
@@ -67,6 +55,8 @@ namespace OOP_lab2.WebAPI.Controllers {
         // DELETE: api/smartfons/{id}
         [HttpDelete("{id}")]
         public IActionResult Delete(int id) {
+            Console.WriteLine("Delete Controller in Smartfon sound");
+
             try {
                 var smartfon = _technicService.GetSmartfonList()
                     .FirstOrDefault(s => {
@@ -78,7 +68,6 @@ namespace OOP_lab2.WebAPI.Controllers {
                     return NotFound($"Смартфон с ID {id} не найден");
                 }
 
-                // Удаляем через базовый метод
                 _technicService.Delete(id);
 
                 return NoContent();

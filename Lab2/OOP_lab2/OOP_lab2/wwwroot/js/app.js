@@ -176,6 +176,8 @@ async function fetchBaseEntities() {
 
 async function fetchComputers() {
     try {
+        console.log('API_BASE:', API_BASE);
+
         const response = await fetch(`${API_BASE}/computers`);
         if (!response.ok) throw new Error('Failed to fetch computers');
         const computers = await response.json();
@@ -313,7 +315,11 @@ async function createEntity(constructorIndex) {
             body: JSON.stringify(entityData)
         });
 
-        if (!response.ok) throw new Error('Failed to create entity');
+        if (!response.ok) { 
+            console.error('Error createEntity, currentEntity = ', currentEntity, '/ endpoint = ', endpoint);
+            console.error('response = ', response);
+            throw new Error('Failed to create entity');
+        }
 
         showNotification(`${currentEntity === 'computer' ? 'Компьютер' : 'Смартфон'} создан`, 'success');
         

@@ -9,8 +9,6 @@ namespace OOP_lab2.Class {
         public string Name { get; set; }
         public string Country { get; set; }
         public bool Enabled { get; set; }
-        public virtual Computer Computer { get; set; }
-        public virtual Smartfon Smartfon { get; set; }
         public string getName() { return Name; }
         public int getId() { return Id; }
         public string getCountry() { return Country; }

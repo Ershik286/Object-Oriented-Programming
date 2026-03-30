@@ -7,10 +7,6 @@ namespace OOP_lab2.Class {
         public bool IsCall { get; set; } = false;
         public string Manufactures { get; set; }
 
-        public int? TechnicId { get; set; }
-
-        public virtual Technic Technic { get; set; }
-
         public Smartfon() : base() {
             CameraMP = 1;
             IsCall = false;
