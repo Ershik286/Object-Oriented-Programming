@@ -125,14 +125,14 @@ public class TechnicService {
             .ToList<object>();
     }
 
-    public List<object> GetSmartfonList()
-    {
+    public List<object> GetSmartfonList() {
         return _dbContext.Smartfons
             .Select(c => new {
                 c.Id,
                 c.CameraMP,
                 c.Manufactures,
-                TechnicName = c.Name,      
+                c.IsCall,
+                TechnicName = c.Name,
                 TechnicCountry = c.Country
             })
             .ToList<object>();

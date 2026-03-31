@@ -4,15 +4,19 @@ using OOP_lab2.Class;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Reflection;
+using System.Text.Json;
 
 namespace OOP_lab2.WebAPI.Controllers {
     [ApiController]
     [Route("api/[controller]")]
     public class TechnicsController : ControllerBase {
         private readonly TechnicService _technicService;
+        private readonly AppDbContext _dbContext;
 
-        public TechnicsController(TechnicService technicService) {
+        public TechnicsController(TechnicService technicService, AppDbContext dbContext) {
             _technicService = technicService;
+            _dbContext = dbContext;
         }
 
         // GET: api/technics
@@ -51,19 +55,26 @@ namespace OOP_lab2.WebAPI.Controllers {
 
         // PUT: api/technics/{id}
         [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody] Technic updatedTechnic) {
-            if (updatedTechnic == null || id != updatedTechnic.Id) {
-                return BadRequest("ID в запросе не совпадает с ID объекта");
-            }
-
+        public IActionResult Update(int id, [FromBody] JsonElement updateData) {
             var existingTechnic = _technicService.GetById(id);
             if (existingTechnic == null) {
                 return NotFound($"Техника с ID {id} не найдена");
             }
 
             try {
-                _technicService.Update(updatedTechnic);
-                return Ok(updatedTechnic);
+                // Обновляем только переданные поля
+                if (updateData.TryGetProperty("name", out var name)) {
+                    existingTechnic.Name = name.GetString();
+                }
+                if (updateData.TryGetProperty("country", out var country)) {
+                    existingTechnic.Country = country.GetString();
+                }
+                if (updateData.TryGetProperty("enabled", out var enabled)) {
+                    existingTechnic.Enabled = enabled.GetBoolean();
+                }
+
+                _technicService.Update(existingTechnic);
+                return Ok(existingTechnic);
             }
             catch (Exception ex) {
                 return BadRequest($"Ошибка при обновлении: {ex.Message}");
@@ -84,6 +95,52 @@ namespace OOP_lab2.WebAPI.Controllers {
             }
             catch (Exception ex) {
                 return BadRequest($"Ошибка при удалении: {ex.Message}");
+            }
+        }
+
+        // POST: api/technics/{id}/call-method
+        [HttpPost("{id}/call-method")]
+        public IActionResult CallMethod(int id, [FromBody] MethodCallDto callDto) {
+            var technic = _technicService.GetById(id);
+            if (technic == null) {
+                return NotFound($"Техника с ID {id} не найдена");
+            }
+
+            try {
+                var method = technic.GetType().GetMethod(callDto.MethodName);
+                if (method == null) {
+                    return BadRequest($"Метод {callDto.MethodName} не найден");
+                }
+
+                // Перехватываем вывод Console.WriteLine
+                var stringWriter = new StringWriter();
+                var originalOut = Console.Out;
+                Console.SetOut(stringWriter);
+
+                try {
+                    var result = method.Invoke(technic, null);
+                    var consoleOutput = stringWriter.ToString();
+
+                    // Формируем вывод: если метод вернул значение, добавляем его
+                    string output = consoleOutput;
+                    if (result != null && !string.IsNullOrEmpty(result.ToString())) {
+                        output += (output.Length > 0 ? "\n" : "") + $"Возвращаемое значение: {result}";
+                    }
+
+                    _dbContext.SaveChanges();
+
+                    return Ok(new {
+                        message = "Метод выполнен успешно",
+                        methodName = callDto.MethodName,
+                        output = output.Trim()
+                    });
+                }
+                finally {
+                    Console.SetOut(originalOut);
+                }
+            }
+            catch (Exception ex) {
+                return BadRequest($"Ошибка при вызове метода: {ex.InnerException?.Message ?? ex.Message}");
             }
         }
 
@@ -116,11 +173,15 @@ namespace OOP_lab2.WebAPI.Controllers {
             }
         }
 
-        // HEAD: api/technics/{id} - проверка существования
         [HttpHead("{id}")]
         public IActionResult CheckExists(int id) {
             var exists = _technicService.GetById(id) != null;
             return exists ? Ok() : NotFound();
         }
+    }
+
+    public class MethodCallDto {
+        public string MethodName { get; set; }
+        public object[] Args { get; set; }
     }
 }
