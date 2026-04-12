@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Учет техники - Магазин техники</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <h1>УЧЕТ ТЕХНИКИ</h1>
+        <p>Система управления магазином техники | Базовый класс Technic + дочерние классы</p>
+    </header>
+
+    <!-- Навигация -->
+    <nav class="nav-tabs">
+        <button class="nav-tab active" data-tab="shop">🏪 Магазин</button>
+        <button class="nav-tab" data-tab="technic">📱 Техника</button>
+        <button class="nav-tab" data-tab="computer">💻 Компьютеры</button>
+        <button class="nav-tab" data-tab="smartfon">📱 Смартфоны</button>
+    </nav>
+
+    <!-- ============ ВКЛАДКА МАГАЗИНА ============ -->
+    <div id="shopTab" class="tab-content active">
+        <section class="control-panel">
+            <div class="panel-header">
+                <h2>🏪 Управление магазинами</h2>
+                <div class="status">
+                    <span id="shopCount">0</span> магазинов
+                </div>
+            </div>
+
+            <!-- Создание магазина -->
+            <div class="create-shop-section">
+                <h3>Создать новый магазин</h3>
+                <div class="create-shop-form">
+                    <input type="text" id="shopNameInput" placeholder="Название магазина" class="shop-input">
+                    <button class="btn btn-primary" id="createShopBtn">➕ Создать магазин</button>
+                </div>
+            </div>
+
+            <!-- Список магазинов -->
+            <div class="shops-list">
+                <h3>Список магазинов</h3>
+                <div class="shops-grid" id="shopsGrid">
+                    <!-- Магазины будут загружены сюда -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ============ ВКЛАДКА ТЕХНИКИ (ОБЩАЯ) ============ -->
+    <div id="technicTab" class="tab-content">
+        <section class="control-panel">
+            <div class="panel-header">
+                <h2>📋 Таблица Technic (базовый класс)</h2>
+                <div class="status">
+                    <span id="entityCount">0</span> записей
+                </div>
+            </div>
+
+            <div class="refresh-section">
+                <button class="btn btn-secondary" id="refreshBtn">🔄 ОБНОВИТЬ ВСЕ ТАБЛИЦЫ</button>
+            </div>
+        </section>
+
+        <div class="table-wrapper">
+            <div class="table-container">
+                <table class="data-table" id="baseTable">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Country</th>
+                        <th>Enabled</th>
+                        <th>Магазин</th>
+                        <th>Действия</th>
+                    </tr>
+                    </thead>
+                    <tbody id="baseTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ ВКЛАДКА КОМПЬЮТЕРОВ ============ -->
+    <div id="computerTab" class="tab-content">
+        <section class="control-panel">
+            <div class="panel-header">
+                <h2>💻 Управление компьютерами</h2>
+            </div>
+
+            <!-- Конструкторы для Computer -->
+            <div class="constructors-section">
+                <h3>Доступные конструкторы</h3>
+                <div class="constructors-grid" id="computerConstructorsContainer">
+                    <!-- Карточки конструкторов для компьютеров -->
+                </div>
+            </div>
+        </section>
+
+        <div class="table-wrapper">
+            <h3>Таблица Computer</h3>
+            <div class="table-container">
+                <table class="data-table" id="computerTable">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Название</th>
+                        <th>Страна</th>
+                        <th>Процессор</th>
+                        <th>RAM (ГБ)</th>
+                        <th>Включен</th>
+                        <th>Магазин</th>
+                        <th>Действия</th>
+                    </tr>
+                    </thead>
+                    <tbody id="computerTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ ВКЛАДКА СМАРТФОНОВ ============ -->
+    <div id="smartfonTab" class="tab-content">
+        <section class="control-panel">
+            <div class="panel-header">
+                <h2>📱 Управление смартфонами</h2>
+            </div>
+
+            <!-- Конструкторы для Smartfon -->
+            <div class="constructors-section">
+                <h3>Доступные конструкторы</h3>
+                <div class="constructors-grid" id="smartfonConstructorsContainer">
+                    <!-- Карточки конструкторов для смартфонов -->
+                </div>
+            </div>
+        </section>
+
+        <div class="table-wrapper">
+            <h3>Таблица Smartfon</h3>
+            <div class="table-container">
+                <table class="data-table" id="smartfonTable">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Название</th>
+                        <th>Страна</th>
+                        <th>Камера (МП)</th>
+                        <th>Производитель</th>
+                        <th>Звонок</th>
+                        <th>Включен</th>
+                        <th>Магазин</th>
+                        <th>Действия</th>
+                    </tr>
+                    </thead>
+                    <tbody id="smartfonTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Индикаторы -->
+    <div id="loadingIndicator" class="loading" style="display: none;">Загрузка...</div>
+    <div id="errorMessage" class="error" style="display: none;"></div>
+
+    <footer class="footer">
+        <p>Система учета техники v3.0 | Базовый класс + наследование + магазин</p>
+    </footer>
+</div>
+
+<div id="notification" class="notification"></div>
+<script src="js/app.js"></script>
+</body>
+</html>

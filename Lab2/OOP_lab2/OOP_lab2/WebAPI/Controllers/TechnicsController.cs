@@ -62,7 +62,7 @@ namespace OOP_lab2.WebAPI.Controllers {
             }
 
             try {
-                // Обновляем только переданные поля
+                   // Обновляем только переданные поля
                 if (updateData.TryGetProperty("name", out var name)) {
                     existingTechnic.Name = name.GetString();
                 }

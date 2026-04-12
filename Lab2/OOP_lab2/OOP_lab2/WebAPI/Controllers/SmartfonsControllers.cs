@@ -97,7 +97,7 @@ namespace OOP_lab2.WebAPI.Controllers {
 
             try {
                 var method = smartfon.GetType().GetMethod(callDto.MethodName);
-                if (method == null) {
+                if (method == null) {XmlConfigurationExtensions
                     return BadRequest($"Метод {callDto.MethodName} не найден");
                 }
 
