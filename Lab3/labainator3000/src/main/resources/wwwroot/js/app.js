@@ -225,11 +225,11 @@ function displayBaseEntities(entities) {
             <td>${entity.name || '-'}</td>
             <td>${entity.country || '-'}</td>
             <td>${entity.enabled ? '✅ Да' : '❌ Нет'}</td>
-            <td>${entity.shop?.name || '—'}</td>
+            <td>${entity.shopName || '—'}</td>
             <td class="action-buttons">
-                <button class="method-btn" onclick="callMethod('technic', ${entity.id}, 'displayInfo')">displayInfo()</button>
-                <button class="method-btn" onclick="callMethod('technic', ${entity.id}, 'calculatePowerConsumption')">calcPower()</button>
-                <button class="delete-btn" onclick="deleteBaseEntity(${entity.id})">🗑️</button>
+                <button class="method-btn" onclick="callMethod('technic', ${entity.id}, 'displayInfo')">📄 Показать информацию</button>
+                <button class="method-btn" onclick="callMethod('technic', ${entity.id}, 'calculatePowerConsumption')">⚡ Расчёт энергии</button>
+                <button class="delete-btn" onclick="deleteBaseEntity(${entity.id})">🗑️ Удалить</button>
             </td>
         </tr>
     `).join('');
@@ -273,12 +273,11 @@ function displayComputers(computers) {
             <td>${comp.name || comp.technicName || '-'}</td>
             <td>${comp.modelProcessor || '-'}</td>
             <td>${comp.ram || '-'}</td>
-            <td>${comp.shopName || '—'}</td>
             <td class="action-buttons">
-                <button class="method-btn" onclick="callMethod('computer', ${comp.id}, 'displayInfo')">displayInfo()</button>
-                <button class="method-btn" onclick="callMethod('computer', ${comp.id}, 'calculatePowerConsumption')">calcPower()</button>
-                <button class="method-btn" onclick="callMethod('computer', ${comp.id}, 'enabledDevice')">enabledDevice()</button>
-                <button class="delete-btn" onclick="deleteComputer(${comp.id})">🗑️</button>
+                <button class="method-btn" onclick="callMethod('computer', ${comp.id}, 'displayInfo')">📄 Показать информацию</button>
+                <button class="method-btn" onclick="callMethod('computer', ${comp.id}, 'calculatePowerConsumption')">⚡ Расчёт энергии</button>
+                <button class="method-btn" onclick="callMethod('computer', ${comp.id}, 'enabledDevice')">🔌 Включить</button>
+                <button class="delete-btn" onclick="deleteComputer(${comp.id})">🗑️ Удалить</button>
             </td>
         </tr>
     `).join('');
@@ -323,13 +322,12 @@ function displaySmartfons(smartfons) {
             <td>${sf.cameraMP || '-'}</td>
             <td>${sf.manufactures || '-'}</td>
             <td>${sf.isCall ? '📞 Да' : '🔇 Нет'}</td>
-            <td>${sf.shopName || '—'}</td>
             <td class="action-buttons">
-                <button class="method-btn" onclick="callMethod('smartfon', ${sf.id}, 'displayInfo')">displayInfo()</button>
-                <button class="method-btn" onclick="callMethod('smartfon', ${sf.id}, 'calculatePowerConsumption')">calcPower()</button>
-                <button class="method-btn" onclick="callMethod('smartfon', ${sf.id}, 'takePhoto')">takePhoto()</button>
-                <button class="method-btn" onclick="callMethod('smartfon', ${sf.id}, 'call')">call()</button>
-                <button class="delete-btn" onclick="deleteSmartfon(${sf.id})">🗑️</button>
+                <button class="method-btn" onclick="callMethod('smartfon', ${sf.id}, 'displayInfo')">📄 Показать информацию</button>
+                <button class="method-btn" onclick="callMethod('smartfon', ${sf.id}, 'calculatePowerConsumption')">⚡ Расчёт энергии</button>
+                <button class="method-btn" onclick="callMethod('smartfon', ${sf.id}, 'takePhoto')">📷 Сделать фото</button>
+                <button class="method-btn" onclick="callMethod('smartfon', ${sf.id}, 'call')">📞 Позвонить</button>
+                <button class="delete-btn" onclick="deleteSmartfon(${sf.id})">🗑️ Удалить</button>
             </td>
         </tr>
     `).join('');
@@ -375,46 +373,58 @@ function renderComputerConstructors() {
     const container = document.getElementById('computerConstructorsContainer');
     if (!container) return;
 
-    container.innerHTML = computerConstructors.map((constructor, idx) => `
-        <div class="constructor-card">
-            <h4>${constructor.name}</h4>
-            <p class="constructor-desc">${constructor.description}</p>
-            <div class="constructor-fields">
-                ${renderFieldsForComputer(constructor.fields, idx)}
-                <div class="field-group">
-                    <label>Выбрать магазин:</label>
-                    <select id="shop_select_computer_${idx}" class="shop-select">
-                        <option value="">-- Выберите магазин --</option>
-                        ${shops.map(shop => `<option value="${shop.id}">${shop.name} (ID: ${shop.id})</option>`).join('')}
-                    </select>
+    container.innerHTML = computerConstructors.map((constructor, idx) => {
+        const isDefault = constructor.endpoint === '/default';
+
+        return `
+            <div class="constructor-card">
+                <h4>${constructor.name}</h4>
+                <p class="constructor-desc">${constructor.description}</p>
+                <div class="constructor-fields">
+                    ${renderFieldsForComputer(constructor.fields, idx)}
+                    ${!isDefault ? `
+                        <div class="field-group">
+                            <label>Выбрать магазин:</label>
+                            <select id="shop_select_computer_${idx}" class="shop-select">
+                                <option value="">-- Выберите магазин --</option>
+                                ${shops.map(shop => `<option value="${shop.id}">${shop.name} (ID: ${shop.id})</option>`).join('')}
+                            </select>
+                        </div>
+                    ` : ''}
                 </div>
+                <button class="btn btn-primary" onclick="createComputer(${idx})">Создать</button>
             </div>
-            <button class="btn btn-primary" onclick="createComputer(${idx})">Создать</button>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function renderSmartfonConstructors() {
     const container = document.getElementById('smartfonConstructorsContainer');
     if (!container) return;
 
-    container.innerHTML = smartfonConstructors.map((constructor, idx) => `
-        <div class="constructor-card">
-            <h4>${constructor.name}</h4>
-            <p class="constructor-desc">${constructor.description}</p>
-            <div class="constructor-fields">
-                ${renderFieldsForSmartfon(constructor.fields, idx)}
-                <div class="field-group">
-                    <label>Выбрать магазин:</label>
-                    <select id="shop_select_smartfon_${idx}" class="shop-select">
-                        <option value="">-- Выберите магазин --</option>
-                        ${shops.map(shop => `<option value="${shop.id}">${shop.name} (ID: ${shop.id})</option>`).join('')}
-                    </select>
+    container.innerHTML = smartfonConstructors.map((constructor, idx) => {
+        const isDefault = constructor.endpoint === '/default';
+
+        return `
+            <div class="constructor-card">
+                <h4>${constructor.name}</h4>
+                <p class="constructor-desc">${constructor.description}</p>
+                <div class="constructor-fields">
+                    ${renderFieldsForSmartfon(constructor.fields, idx)}
+                    ${!isDefault ? `
+                        <div class="field-group">
+                            <label>Выбрать магазин:</label>
+                            <select id="shop_select_smartfon_${idx}" class="shop-select">
+                                <option value="">-- Выберите магазин --</option>
+                                ${shops.map(shop => `<option value="${shop.id}">${shop.name} (ID: ${shop.id})</option>`).join('')}
+                            </select>
+                        </div>
+                    ` : ''}
                 </div>
+                <button class="btn btn-primary" onclick="createSmartfon(${idx})">Создать</button>
             </div>
-            <button class="btn btn-primary" onclick="createSmartfon(${idx})">Создать</button>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function renderFieldsForComputer(fields, idx) {
@@ -453,9 +463,12 @@ async function createComputer(constructorIdx) {
         }
     }
 
-    const shopSelect = document.getElementById(`shop_select_computer_${constructorIdx}`);
-    if (shopSelect && shopSelect.value) {
-        data.shopId = parseInt(shopSelect.value);
+    // Добавляем shopId только если это НЕ конструктор по умолчанию
+    if (constructorIdx !== 0) {
+        const shopSelect = document.getElementById(`shop_select_computer_${constructorIdx}`);
+        if (shopSelect && shopSelect.value) {
+            data.shopId = parseInt(shopSelect.value);
+        }
     }
 
     showLoading(true);
@@ -477,7 +490,10 @@ async function createComputer(constructorIdx) {
                 else input.value = '';
             }
         }
-        if (shopSelect) shopSelect.value = '';
+        if (constructorIdx !== 0) {
+            const shopSelect = document.getElementById(`shop_select_computer_${constructorIdx}`);
+            if (shopSelect) shopSelect.value = '';
+        }
     } catch (error) {
         showNotification('Ошибка создания компьютера', 'error');
     } finally {
@@ -501,9 +517,12 @@ async function createSmartfon(constructorIdx) {
         }
     }
 
-    const shopSelect = document.getElementById(`shop_select_smartfon_${constructorIdx}`);
-    if (shopSelect && shopSelect.value) {
-        data.shopId = parseInt(shopSelect.value);
+    // Добавляем shopId только если это НЕ конструктор по умолчанию
+    if (constructorIdx !== 0) {
+        const shopSelect = document.getElementById(`shop_select_smartfon_${constructorIdx}`);
+        if (shopSelect && shopSelect.value) {
+            data.shopId = parseInt(shopSelect.value);
+        }
     }
 
     showLoading(true);
@@ -525,7 +544,10 @@ async function createSmartfon(constructorIdx) {
                 else input.value = '';
             }
         }
-        if (shopSelect) shopSelect.value = '';
+        if (constructorIdx !== 0) {
+            const shopSelect = document.getElementById(`shop_select_smartfon_${constructorIdx}`);
+            if (shopSelect) shopSelect.value = '';
+        }
     } catch (error) {
         showNotification('Ошибка создания смартфона', 'error');
     } finally {
@@ -570,7 +592,7 @@ window.callMethod = callMethod;
 window.deleteBaseEntity = deleteBaseEntity;
 window.deleteComputer = deleteComputer;
 window.deleteSmartfon = deleteSmartfon;
-window.editShop = editShop;
 window.deleteShop = deleteShop;
+window.editShop = editShop;
 window.createComputer = createComputer;
 window.createSmartfon = createSmartfon;

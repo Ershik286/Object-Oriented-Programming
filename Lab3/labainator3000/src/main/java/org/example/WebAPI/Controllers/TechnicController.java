@@ -19,9 +19,9 @@ public class TechnicController {
 
     // GET all
     @GetMapping
-    public ResponseEntity<List<Technic>> getAll() {
+    public ResponseEntity<List<Map<String, Object>>> getAll() {
         try {
-            List<Technic> technics = technicService.getAll();
+            List<Map<String, Object>> technics = technicService.getAllTechnicsWithShop();
             System.out.println("Возвращено " + technics.size() + " записей");
             return ResponseEntity.ok(technics);
         } catch (Exception e) {

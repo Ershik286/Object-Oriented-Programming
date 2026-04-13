@@ -1,7 +1,6 @@
 package org.example.WebAPI.Controllers;
 
 import org.example.AppDataAPI.TechnicService;
-import org.example.Class.Computer;
 import org.example.WebAPI.MethodInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -86,6 +85,23 @@ public class ComputerController {
             Computer computer = new Computer(name, modelProcessor, ram, shop);
             technicService.createComputer(computer);
             return ResponseEntity.status(HttpStatus.CREATED).body(computer);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSmartfon(@PathVariable Long id) {
+        try {
+            Computer existing = technicService.getComputerById(id);
+            if (existing != null) {
+                technicService.delete(id);
+                System.out.println("Удален смартфон с ID: " + id);
+                return ResponseEntity.noContent().build();
+            } else {
+                return ResponseEntity.notFound().build();
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

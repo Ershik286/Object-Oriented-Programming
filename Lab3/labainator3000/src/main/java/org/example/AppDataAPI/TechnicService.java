@@ -159,7 +159,6 @@ public class TechnicService {
     public void createSmartfon(Smartfon smartfon) {
         System.out.println("CreateSmartfon: " + smartfon.getName() + ", " + smartfon.getManufactures());
 
-        smartfon.setId(0L);
         entityManager.persist(smartfon);
         entityManager.flush();
 
@@ -178,9 +177,18 @@ public class TechnicService {
             item.put("ram", computer.getRam());
             item.put("technicName", computer.getName());
             item.put("technicCountry", computer.getCountry());
+
+            ComputerShop shop = computer.getShop();
+            if (shop != null) {
+                item.put("shopId", shop.getId());
+                item.put("shopName", shop.getName());
+            } else {
+                item.put("shopId", null);
+                item.put("shopName", null);
+            }
+
             result.add(item);
         }
-
         return result;
     }
 
@@ -197,9 +205,44 @@ public class TechnicService {
             item.put("isCall", smartfon.isCall());
             item.put("technicName", smartfon.getName());
             item.put("technicCountry", smartfon.getCountry());
+
+            ComputerShop shop = smartfon.getShop();
+            if (shop != null) {
+                item.put("shopId", shop.getId());
+                item.put("shopName", shop.getName());
+            } else {
+                item.put("shopId", null);
+                item.put("shopName", null);
+            }
+
             result.add(item);
         }
+        return result;
+    }
 
+    // Получить все техники с информацией о магазине
+    public List<Map<String, Object>> getAllTechnicsWithShop() {
+        List<Technic> technics = getAll();
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (Technic technic : technics) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", technic.getId());
+            item.put("name", technic.getName());
+            item.put("country", technic.getCountry());
+            item.put("enabled", technic.isEnabled());
+
+            ComputerShop shop = technic.getShop();
+            if (shop != null) {
+                item.put("shopId", shop.getId());
+                item.put("shopName", shop.getName());
+            } else {
+                item.put("shopId", null);
+                item.put("shopName", null);
+            }
+
+            result.add(item);
+        }
         return result;
     }
 

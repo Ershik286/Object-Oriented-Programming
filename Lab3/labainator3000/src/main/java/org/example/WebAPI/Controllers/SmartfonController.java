@@ -1,7 +1,7 @@
 package org.example.WebAPI.Controllers;
 
 import org.example.AppDataAPI.TechnicService;
-import org.example.Class.Smartfon;
+import org.example.Class.*;
 import org.example.WebAPI.MethodInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -61,10 +61,18 @@ public class SmartfonController {
 
     // ============ КОНСТРУКТОР 2: С КАМЕРОЙ ============
     @PostMapping("/create")
-    public ResponseEntity<Smartfon> createSmartfon(@RequestBody Smartfon smartfon) {
+    public ResponseEntity<Smartfon> createSmartfon(@RequestBody Map<String, Object> data) {
         try {
+            String name = (String) data.get("name");
+            int cameraMP = data.get("cameraMP") != null ? ((Number) data.get("cameraMP")).intValue() : 12;
+            String manufactures = (String) data.getOrDefault("manufactures", "Samsung");
+            Long shopId = data.get("shopId") != null ? ((Number) data.get("shopId")).longValue() : null;
+
+            ComputerShop shop = shopId != null ? technicService.getShopById(shopId) : null;
+            Smartfon smartfon = new Smartfon(name, cameraMP, manufactures, shop);
+
             technicService.createSmartfon(smartfon);
-            System.out.println("Создан смартфон через конструктор с параметрами");
+            System.out.println("Создан смартфон через конструктор с параметрами: " + name);
             return ResponseEntity.status(HttpStatus.CREATED).body(smartfon);
         } catch (Exception e) {
             e.printStackTrace();
