@@ -510,3 +510,35 @@ body {
     gap: 10px;
     margin-top: 15px;
 }
+/* Стили для скролла в модальном окне */
+#resultModal {
+    animation: fadeIn 0.2s ease-out;
+}
+
+#resultModal > div:nth-child(2) {
+    overflow-y: auto !important;
+    scrollbar-width: thin;
+}
+
+#resultModal > div:nth-child(2)::-webkit-scrollbar {
+    width: 6px;
+}
+
+#resultModal > div:nth-child(2)::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+#resultModal > div:nth-child(2)::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+#resultModal > div:nth-child(2)::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}

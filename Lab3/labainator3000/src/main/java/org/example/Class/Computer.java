@@ -1,6 +1,9 @@
 package org.example.Class;
 
 import jakarta.persistence.*;
+import org.springframework.objenesis.ObjenesisHelper;
+
+import java.util.*;
 
 @Entity
 @Table(name = "computer")
@@ -13,7 +16,6 @@ public class Computer extends Technic {
     @Column(name = "ram")
     private int ram;
 
-    // Конструкторы - НИКОГДА не устанавливаем ID
     public Computer() {
         super();
         this.modelProcessor = "Intel Core i5";
@@ -57,15 +59,43 @@ public class Computer extends Technic {
         this.ram = ram;
     }
 
-    public void enabledDevice() {
-        setEnabled(true);
+    public boolean upgradeProcessor(String newProcessor) {
+        if (newProcessor == null || newProcessor.trim().isEmpty()) {
+            System.out.println("Ошибка: название процессора не может быть пустым");
+            return false;
+        }
+
+        String oldProcessor = this.modelProcessor;
+        this.modelProcessor = newProcessor;
+        System.out.println("Процессор обновлён с " + oldProcessor + " на " + newProcessor);
+        return true;
+    }
+
+    public boolean changeRam(int additionalRam) {
+        int newRam = this.ram + additionalRam;
+
+        if (newRam < 1) {
+            System.out.println("Ошибка: ОЗУ не может быть меньше 1 ГБ");
+            return false;
+        }
+
+        if (newRam > 128) {
+            System.out.println("Ошибка: ОЗУ не может превышать 128 ГБ");
+            return false;
+        }
+
+        System.out.println("ОЗУ изменено с " + this.ram + " ГБ на " + newRam + " ГБ");
+        this.ram = newRam;
+        return true;
     }
 
     @Override
-    public void displayInfo() {
-        super.displayInfo();
-        System.out.println("Модель процессора: " + modelProcessor);
-        System.out.println("Объем ОЗУ: " + ram + " ГБ");
+    public Map<String, Object> displayInfo() {
+        Map<String, Object> result = super.displayInfo();
+        result.put("modelProcessor", modelProcessor);
+        result.put("ram", ram + " ГБ");
+        result.put("type", "Computer");
+        return result;
     }
 
     @Override

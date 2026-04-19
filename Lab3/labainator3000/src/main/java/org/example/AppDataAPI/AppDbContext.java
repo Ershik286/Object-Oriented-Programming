@@ -10,7 +10,7 @@ import java.util.Properties;
 public class AppDbContext {
 
     // Настройки подключения к БД
-    public static final String DB_HOST = "192.168.0.107";
+    public static final String DB_HOST = "192.168.0.106";
     public static final int DB_PORT = 5432;
     public static final String DB_NAME = "TechnicsJava";
     public static final String DB_USERNAME = "Ershik286";

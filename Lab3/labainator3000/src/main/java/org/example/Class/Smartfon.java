@@ -2,6 +2,8 @@ package org.example.Class;
 
 import jakarta.persistence.*;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 @Table(name = "smartfon")
@@ -57,6 +59,8 @@ public class Smartfon extends Technic implements Serializable {
         return isCall;
     }
 
+    public void setIsCall(Boolean isCall){ this.isCall = isCall; }
+
     // Сеттеры
     public void setCameraMP(int cameraMP) {
         this.cameraMP = cameraMP;
@@ -80,10 +84,12 @@ public class Smartfon extends Technic implements Serializable {
     }
 
     @Override
-    public void displayInfo() {
-        super.displayInfo();
-        System.out.println("Производитель телефона: " + manufactures);
-        System.out.println("Мегапиксели телефона: " + cameraMP);
+    public Map<String, Object> displayInfo() {
+        Map<String, Object> result = super.displayInfo();
+        result.put("cameraMP: ", cameraMP);
+        result.put("isCall: ", isCall ? "звонит" : "не звонит");
+        result.put("manufacture", manufactures);
+        return result;
     }
 
     @Override

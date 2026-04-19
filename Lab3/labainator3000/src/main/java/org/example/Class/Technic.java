@@ -3,6 +3,8 @@ package org.example.Class;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.Map;
+import java.util.HashMap;
 
 @Entity
 @Table(name = "technic")
@@ -92,12 +94,20 @@ public class Technic implements Serializable {
         }
     }
 
+    public void switchDevice() {
+        setEnabled(isEnabled() ? false : true);
+    }
+
     // Методы
-    public void displayInfo() {
-        System.out.println("Устройство: " + name);
-        System.out.println("ID: " + id);
-        System.out.println("Страна производитель: " + country);
-        System.out.println("Состояние: " + (enabled ? "включен" : "Выключен"));
+    public Map<String, Object> displayInfo() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("type", "Устройство");
+        data.put("name", name);
+        data.put("id", id);
+        data.put("country", country);
+        data.put("enabled", enabled);
+        data.put("status", enabled ? "включен" : "Выключен");
+        return data;
     }
 
     public double calculatePowerConsumption() {
