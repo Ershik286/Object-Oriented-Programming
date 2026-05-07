@@ -3,6 +3,8 @@ package org.example.WebAPI.Controllers;
 import org.example.AppDataAPI.TechnicService;
 import org.example.Class.Technic;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ import org.example.Class.*;
 
 @RestController
 @RequestMapping("/api/technic")
+@Transactional
 public class TechnicController {
 
     @Autowired
@@ -33,9 +36,9 @@ public class TechnicController {
     @GetMapping("/{id}")
     public ResponseEntity<Technic> getById(@PathVariable Long id) {
         try {
-            Technic technic = technicService.getById(id);
-            if (technic != null) {
-                return ResponseEntity.ok(technic);
+            Technic existing = technicService.getTechnicRepository().getById(id);
+            if (existing != null) {
+                return ResponseEntity.ok(existing);
             } else {
                 return ResponseEntity.notFound().build();
             }
@@ -60,7 +63,7 @@ public class TechnicController {
     @PutMapping("/{id}")
     public ResponseEntity<Technic> update(@PathVariable Long id, @RequestBody Technic technic) {
         try {
-            Technic existing = technicService.getById(id);
+            Technic existing = technicService.getEntityManager().find(Technic.class, id);
             if (existing != null) {
                 technic.setId(id);
                 technicService.update(technic);
@@ -78,7 +81,7 @@ public class TechnicController {
     @PatchMapping("/{id}")
     public ResponseEntity<Map<String, Object>> patchUpdate(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
         try {
-            Technic technic = technicService.getById(id);
+            Technic technic = technicService.getTechnicRepository().getById(id);
             if (technic == null) {
                 return ResponseEntity.notFound().build();
             }
@@ -102,7 +105,7 @@ public class TechnicController {
             }
             if (updates.containsKey("shopId")) {
                 Long shopId = updates.get("shopId") != null ? ((Number) updates.get("shopId")).longValue() : null;
-                ComputerShop shop = shopId != null ? technicService.getShopById(shopId) : null;
+                ComputerShop shop = shopId != null ? technicService.getComputerShopRepository().findById(shopId).orElse(null) : null;
                 technic.setShop(shop);
                 response.put("shopId", shopId);
             }
@@ -121,7 +124,7 @@ public class TechnicController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         try {
-            Technic existing = technicService.getById(id);
+            Technic existing = technicService.getTechnicRepository().getById(id);
             if (existing != null) {
                 technicService.delete(id);
                 return ResponseEntity.noContent().build();
@@ -144,7 +147,7 @@ public class TechnicController {
             }
             String methodName = (String) methodInfoMap.get("methodName");
 
-            Technic technic = technicService.getById(id);
+            Technic technic = technicService.getTechnicRepository().getById(id);
             if (technic == null) {
                 return ResponseEntity.notFound().build();
             }

@@ -5,6 +5,7 @@ import org.example.Class.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/smartfon")
+@Transactional
 public class SmartfonController {
 
     @Autowired
@@ -30,7 +32,8 @@ public class SmartfonController {
     @GetMapping("/{id}")
     public ResponseEntity<Smartfon> getSmartfonById(@PathVariable Long id) {
         try {
-            Smartfon smartfon = technicService.getSmartfonById(id);
+            Technic technic = technicService.getEntityManager().find(Technic.class, id);
+            Smartfon smartfon = (technic instanceof Smartfon) ? (Smartfon) technic : null;
             if (smartfon != null) {
                 return ResponseEntity.ok(smartfon);
             } else {
@@ -45,7 +48,8 @@ public class SmartfonController {
     @PatchMapping("/{id}")
     public ResponseEntity<Map<String, Object>> patchUpdate(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
         try {
-            Smartfon smartfon = technicService.getSmartfonById(id);
+            Technic technic = technicService.getEntityManager().find(Technic.class, id);
+            Smartfon smartfon = (technic instanceof Smartfon) ? (Smartfon) technic : null;
             if (smartfon == null) {
                 return ResponseEntity.notFound().build();
             }
@@ -73,12 +77,12 @@ public class SmartfonController {
                 response.put("manufactures", updates.get("manufactures"));
             }
             if (updates.containsKey("isCall")) {
-                smartfon.setIsCall((boolean) updates.get("isCall"));
+                smartfon.setCall((boolean) updates.get("isCall"));
                 response.put("isCall", updates.get("isCall"));
             }
             if (updates.containsKey("shopId")) {
                 Long shopId = updates.get("shopId") != null ? ((Number) updates.get("shopId")).longValue() : null;
-                ComputerShop shop = shopId != null ? technicService.getShopById(shopId) : null;
+                ComputerShop shop = shopId != null ? technicService.getComputerShopRepository().findById(shopId).orElse(null) : null;
                 smartfon.setShop(shop);
                 response.put("shopId", shopId);
             }
@@ -101,7 +105,9 @@ public class SmartfonController {
             Map<String, Object> methodInfoMap = (Map<String, Object>) request.get("methodInfo");
             String methodName = (String) methodInfoMap.get("methodName");
 
-            Smartfon smartfon = technicService.getSmartfonById(id);
+            Technic technic = technicService.getEntityManager().find(Technic.class, id);
+            Smartfon smartfon = (technic instanceof Smartfon) ? (Smartfon) technic : null;
+
             Map<String, Object> response = new HashMap<>();
 
             switch (methodName) {
@@ -166,7 +172,7 @@ public class SmartfonController {
             int cameraMP = ((Number) data.get("cameraMP")).intValue();
             String manufactures = (String) data.get("manufactures");
             Long shopId = data.get("shopId") != null ? ((Number) data.get("shopId")).longValue() : null;
-            ComputerShop shop = shopId != null ? technicService.getShopById(shopId) : null;
+            ComputerShop shop = shopId != null ? technicService.getComputerShopRepository().findById(shopId).orElse(null) : null;
             Smartfon smartfon = new Smartfon(name, cameraMP, manufactures, shop);
             technicService.createSmartfon(smartfon);
             return ResponseEntity.status(HttpStatus.CREATED).body(smartfon);
@@ -185,7 +191,7 @@ public class SmartfonController {
             boolean isCall = (boolean) data.getOrDefault("isCall", false);
             String manufactures = (String) data.get("manufactures");
             Long shopId = data.get("shopId") != null ? ((Number) data.get("shopId")).longValue() : null;
-            ComputerShop shop = shopId != null ? technicService.getShopById(shopId) : null;
+            ComputerShop shop = shopId != null ? technicService.getComputerShopRepository().findById(shopId).orElse(null) : null;
             Smartfon smartfon = new Smartfon(name, country, enabled, cameraMP, isCall, manufactures, shop);
             technicService.createSmartfon(smartfon);
             return ResponseEntity.status(HttpStatus.CREATED).body(smartfon);
@@ -197,8 +203,9 @@ public class SmartfonController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSmartfon(@PathVariable Long id) {
         try {
-            Smartfon existing = technicService.getSmartfonById(id);
-            if (existing != null) {
+            Technic technic = technicService.getEntityManager().find(Technic.class, id);
+            Smartfon smartfon = (technic instanceof Smartfon) ? (Smartfon) technic : null;
+            if (smartfon != null) {
                 technicService.delete(id);
                 return ResponseEntity.noContent().build();
             } else {

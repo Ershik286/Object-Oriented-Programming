@@ -5,9 +5,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-import jakarta.persistence.Query;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -35,103 +32,103 @@ public class TechnicService {
 
     // Обновление техники
     public void update(Technic technic) {
-        entityManager.merge(technic);
-        entityManager.flush();
+        getEntityManager().merge(technic);
+        getEntityManager().flush();
     }
 
     public List<ComputerShop> getAllShops() {
-        return computerShopRepository.findAll();
+        return getComputerShopRepository().findAll();
     }
 
     public ComputerShop getShopById(Long id) {
-        return computerShopRepository.findById(id).orElse(null);
+        return getComputerShopRepository().findById(id).orElse(null);
     }
 
     public ComputerShop createShop(String name) {
         ComputerShop shop = new ComputerShop(name);
-        return computerShopRepository.save(shop);
+        return getComputerShopRepository().save(shop);
     }
 
     public ComputerShop updateShop(Long id, String name) {
-        ComputerShop shop = computerShopRepository.findById(id).orElse(null);
+        ComputerShop shop = getComputerShopRepository().findById(id).orElse(null);
         if (shop != null) {
             shop.setName(name);
-            return computerShopRepository.save(shop);
+            return getComputerShopRepository().save(shop);
         }
         return null;
     }
 
     public void deleteShop(Long id) {
-        computerShopRepository.deleteById(id);
+        getComputerShopRepository().deleteById(id);
     }
 
     public List<Technic> getShopTechnics(Long shopId) {
-        ComputerShop shop = computerShopRepository.findById(shopId).orElse(null);
+        ComputerShop shop = getComputerShopRepository().findById(shopId).orElse(null);
         return shop != null ? shop.getSaleTechnic() : new ArrayList<>();
     }
 
     public Computer getComputerById(Long id) {
-        Technic technic = entityManager.find(Technic.class, id);
+        Technic technic = getEntityManager().find(Technic.class, id);
         return (technic instanceof Computer) ? (Computer) technic : null;
     }
 
     // Получить Smartfon по ID
     public Smartfon getSmartfonById(Long id) {
-        Technic technic = entityManager.find(Technic.class, id);
+        Technic technic = getEntityManager().find(Technic.class, id);
         return (technic instanceof Smartfon) ? (Smartfon) technic : null;
     }
 
     public void addExistingTechnicToShop(Long shopId, Long technicId) {
-        ComputerShop shop = computerShopRepository.findById(shopId).orElse(null);
-        Technic technic = technicRepository.findById(technicId).orElse(null);
+        ComputerShop shop = getComputerShopRepository().findById(shopId).orElse(null);
+        Technic technic = getTechnicRepository().findById(technicId).orElse(null);
 
         if (shop != null && technic != null) {
             shop.addTechnic(technic);
-            computerShopRepository.save(shop);
+            getComputerShopRepository().save(shop);
         }
     }
 
     public void removeTechnicFromShop(Long shopId, Long technicId) {
-        ComputerShop shop = computerShopRepository.findById(shopId).orElse(null);
+        ComputerShop shop = getComputerShopRepository().findById(shopId).orElse(null);
         if (shop != null) {
             shop.removeTechnicById(technicId);
-            computerShopRepository.save(shop);
+            getComputerShopRepository().save(shop);
         }
     }
 
     // Удаление по ID
     public void delete(Long id) {
-        Technic technic = entityManager.find(Technic.class, id);
+        Technic technic = getEntityManager().find(Technic.class, id);
         if (technic != null) {
-            entityManager.remove(technic);
-            entityManager.flush();
+            getEntityManager().remove(technic);
+            getEntityManager().flush();
         }
     }
 
     // Получить количество
-    public long getCount() {
-        Query query = entityManager.createQuery("SELECT COUNT(t) FROM Technic t");
-        return (long) query.getSingleResult();
-    }
-
-    // Получить все
-    public List<Technic> getAll() {
-        return entityManager.createQuery("SELECT t FROM Technic t", Technic.class)
-                .getResultList();
-    }
-
-    // Получить по ID
-    public Technic getById(Long id) {
-        return entityManager.find(Technic.class, id);
-    }
+//    public long getCount() {
+//        Query query = getEntityManager().createQuery("SELECT COUNT(t) FROM Technic t");
+//        return (long) query.getSingleResult();
+//    }
+//
+//    // Получить все
+//    public List<Technic> getAll() {
+//        return getEntityManager().createQuery("SELECT t FROM Technic t", Technic.class)
+//                .getResultList();
+//    }
+//
+//    // Получить по ID
+//    public Technic getById(Long id) {
+//        return getEntityManager().find(Technic.class, id);
+//    }
 
     // Создать технику
     public void create(Technic technic) {
         if (technic.getId() != null && technic.getId() == 0) {
             technic.setId(null);
         }
-        entityManager.persist(technic);
-        entityManager.flush();
+        getEntityManager().persist(technic);
+        getEntityManager().flush();
     }
 
     // Создать компьютер
@@ -149,8 +146,8 @@ public class TechnicService {
         }
 
         // Используем persist для нового объекта
-        entityManager.persist(computer);
-        entityManager.flush();
+        getEntityManager().persist(computer);
+        getEntityManager().flush();
 
         System.out.println("Computer created with ID: " + computer.getId());
     }
@@ -159,15 +156,15 @@ public class TechnicService {
     public void createSmartfon(Smartfon smartfon) {
         System.out.println("CreateSmartfon: " + smartfon.getName() + ", " + smartfon.getManufactures());
 
-        entityManager.persist(smartfon);
-        entityManager.flush();
+        getEntityManager().persist(smartfon);
+        getEntityManager().flush();
 
         System.out.println("Created with ID: " + smartfon.getId());
     }
 
     // Получить компьютеры с деталями
     public List<Map<String, Object>> getComputersWithDetails() {
-        List<Computer> computers = computerRepository.findAll();
+        List<Computer> computers = getComputerRepository().findAll();
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (Computer computer : computers) {
@@ -192,12 +189,15 @@ public class TechnicService {
         return result;
     }
 
-    // Получить список смартфонов
     public List<Map<String, Object>> getSmartfonList() {
         List<Smartfon> smartfons = smartfonRepository.findAll();
         List<Map<String, Object>> result = new ArrayList<>();
 
+        System.out.println("DEBUG: Найдено смартфонов в репозитории: " + smartfons.size());
+
         for (Smartfon smartfon : smartfons) {
+            System.out.println("DEBUG: Обработка смартфона: " + smartfon.getName());
+
             Map<String, Object> item = new HashMap<>();
             item.put("id", smartfon.getId());
             item.put("cameraMP", smartfon.getCameraMP());
@@ -205,8 +205,16 @@ public class TechnicService {
             item.put("isCall", smartfon.isCall());
             item.put("technicName", smartfon.getName());
             item.put("technicCountry", smartfon.getCountry());
+            item.put("enabled", smartfon.isEnabled());
 
-            ComputerShop shop = smartfon.getShop();
+            // Безопасная проверка shop
+            ComputerShop shop = null;
+            try {
+                shop = smartfon.getShop();
+            } catch (Exception e) {
+                System.out.println("DEBUG: Не удалось получить shop: " + e.getMessage());
+            }
+
             if (shop != null) {
                 item.put("shopId", shop.getId());
                 item.put("shopName", shop.getName());
@@ -217,12 +225,14 @@ public class TechnicService {
 
             result.add(item);
         }
+
+        System.out.println("DEBUG: Результат: " + result.size());
         return result;
     }
 
     // Получить все техники с информацией о магазине
     public List<Map<String, Object>> getAllTechnicsWithShop() {
-        List<Technic> technics = getAll();
+        List<Technic> technics = technicRepository.findAll();
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (Technic technic : technics) {
@@ -246,14 +256,43 @@ public class TechnicService {
         return result;
     }
 
-    // Получить по SQL запросу
-    @SuppressWarnings("unchecked")
-    public List<Technic> getByRawSql(String country) {
-        Query query = entityManager.createNativeQuery(
-                "SELECT * FROM technic WHERE country = :country",
-                Technic.class
-        );
-        query.setParameter("country", country);
-        return query.getResultList();
+    public EntityManager getEntityManager() {
+        return entityManager;
+    }
+
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
+    public ComputerShopRepository getComputerShopRepository() {
+        return computerShopRepository;
+    }
+
+    public void setComputerShopRepository(ComputerShopRepository computerShopRepository) {
+        this.computerShopRepository = computerShopRepository;
+    }
+
+    public TechnicRepository getTechnicRepository() {
+        return technicRepository;
+    }
+
+    public void setTechnicRepository(TechnicRepository technicRepository) {
+        this.technicRepository = technicRepository;
+    }
+
+    public ComputerRepository getComputerRepository() {
+        return computerRepository;
+    }
+
+    public void setComputerRepository(ComputerRepository computerRepository) {
+        this.computerRepository = computerRepository;
+    }
+
+    public SmartfonRepository getSmartfonRepository() {
+        return smartfonRepository;
+    }
+
+    public void setSmartfonRepository(SmartfonRepository smartfonRepository) {
+        this.smartfonRepository = smartfonRepository;
     }
 }

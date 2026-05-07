@@ -36,7 +36,7 @@ public class MainApplication {
                     System.out.println("Desktop не поддерживается. Откройте вручную: " + url);
                 }
             } catch (Exception e) {
-                System.out.println("Не удалось открыть браузер автоматически");
+                //System.out.println("Не удалось открыть браузер автоматически");
                 System.out.println("Откройте вручную: " + url);
             }
         };

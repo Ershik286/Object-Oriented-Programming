@@ -7,9 +7,11 @@ import org.example.Class.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Transactional
 @RequestMapping("/api/shop")
 public class ShopController {
 
@@ -22,7 +24,7 @@ public class ShopController {
     @GetMapping("/all")
     public ResponseEntity<List<ComputerShop>> getAllShops() {
         try {
-            List<ComputerShop> shops = technicService.getAllShops();
+            List<ComputerShop> shops = technicService.getComputerShopRepository().findAll();
             System.out.println("Возвращено магазинов: " + shops.size());
             return ResponseEntity.ok(shops);
         } catch (Exception e) {
@@ -35,7 +37,7 @@ public class ShopController {
     @GetMapping("/shop/{id}")
     public ResponseEntity<ComputerShop> getShopById(@PathVariable Long id) {
         try {
-            ComputerShop shop = technicService.getShopById(id);
+            ComputerShop shop = technicService.getComputerShopRepository().findById(id).orElse(null);
             if (shop != null) {
                 System.out.println("Возвращен магазин: " + shop.getName());
                 return ResponseEntity.ok(shop);
@@ -52,7 +54,9 @@ public class ShopController {
     @PostMapping("/create")
     public ResponseEntity<ComputerShop> createShop(@RequestParam String name) {
         try {
-            ComputerShop shop = technicService.createShop(name);
+            ComputerShop shop = new ComputerShop(name);
+            technicService.getComputerShopRepository().save(shop);
+
             System.out.println("Создан магазин: " + shop.getName() + " с ID: " + shop.getId());
             return ResponseEntity.status(HttpStatus.CREATED).body(shop);
         } catch (Exception e) {
@@ -82,9 +86,9 @@ public class ShopController {
     @DeleteMapping("/shop/{id}")
     public ResponseEntity<Void> deleteShop(@PathVariable Long id) {
         try {
-            ComputerShop shop = technicService.getShopById(id);
+            ComputerShop shop = technicService.getComputerShopRepository().findById(id).orElse(null);
             if (shop != null) {
-                technicService.deleteShop(id);
+                technicService.getComputerShopRepository().deleteById(id);
                 System.out.println("Удален магазин с ID: " + id);
                 return ResponseEntity.noContent().build();
             } else {
@@ -100,7 +104,14 @@ public class ShopController {
     @GetMapping("/{shopId}/technics")
     public ResponseEntity<List<Technic>> getShopTechnics(@PathVariable Long shopId) {
         try {
-            List<Technic> technics = technicService.getShopTechnics(shopId);
+            ComputerShop shop = technicService.getComputerShopRepository().findById(shopId).orElse(null);
+            List<Technic> technics;
+            if (shop != null) {
+                technics = shop.getSaleTechnic();
+            }
+            else {
+                technics = new ArrayList<>();
+            }
             System.out.println("Возвращено техники из магазина " + shopId + ": " + technics.size());
             return ResponseEntity.ok(technics);
         } catch (Exception e) {
@@ -141,7 +152,7 @@ public class ShopController {
     @GetMapping("/sale_technic")
     public ResponseEntity<List<Technic>> getAllSaleTechnic() {
         try {
-            List<Technic> technics = technicService.getAll();
+            List<Technic> technics = technicService.getTechnicRepository().findAll();
             System.out.println("Возврат всех данных из таблиц, найдено: " + technics.size());
             return ResponseEntity.ok(technics);
         } catch (Exception e) {
@@ -154,7 +165,7 @@ public class ShopController {
     @GetMapping("/technic/{id}")
     public ResponseEntity<Technic> getTechnic(@PathVariable Long id) {
         try {
-            Technic technic = technicService.getById(id);
+            Technic technic = technicService.getEntityManager().find(Technic.class, id);
             if (technic != null) {
                 System.out.println("Возвращена техника с ID: " + id);
                 return ResponseEntity.ok(technic);
@@ -171,7 +182,7 @@ public class ShopController {
     @DeleteMapping("/technic/{id}")
     public ResponseEntity<Void> deleteTechnic(@PathVariable Long id) {
         try {
-            Technic existing = technicService.getById(id);
+            Technic existing = technicService.getEntityManager().find(Technic.class, id);
             if (existing != null) {
                 technicService.delete(id);
                 System.out.println("Удалена техника с ID: " + id);
@@ -202,7 +213,7 @@ public class ShopController {
     @PutMapping("/technic/{id}")
     public ResponseEntity<Technic> updateTechnic(@PathVariable Long id, @RequestBody Technic technic) {
         try {
-            Technic existing = technicService.getById(id);
+            Technic existing = technicService.getEntityManager().find(Technic.class, id);
             if (existing != null) {
                 technic.setId(id);
                 technicService.update(technic);

@@ -497,10 +497,14 @@ function displaySmartfons(smartfons) {
         return;
     }
 
-    tbody.innerHTML = smartfons.map(sf => `
+    tbody.innerHTML = smartfons.map(sf => {
+        // Отладка - посмотрим что приходит
+        console.log('Smartfon data:', sf);
+
+        return `
         <tr>
             <td>${sf.id || '-'}</td>
-            <td>${escapeHtml(sf.name || sf.technicName || '-')}</td>
+            <td>${escapeHtml(sf.technicName || sf.name || '-')}</td>  <!-- ← ИСПРАВЛЕНО: используем technicName -->
             <td>${sf.cameraMP || '-'}</td>
             <td>${escapeHtml(sf.manufactures || '-')}</td>
             <td>${sf.isCall ? '📞 Да' : '🔇 Нет'}</td>
@@ -513,9 +517,9 @@ function displaySmartfons(smartfons) {
                 <button class="method-btn" onclick="callMethod('smartfon', ${sf.id}, 'reset')">🔇 Сбросить звонок</button>
                 <button class="delete-btn" onclick="deleteSmartfon(${sf.id})">🗑️ Удалить</button>
                 <button class="edit-btn" onclick="editSmartfonById(${sf.id})">✏️ Изменить</button>
-              </td>
+            </td>
         </tr>
-    `).join('');
+    `}).join('');
 }
 
 async function deleteSmartfon(id) {
@@ -1292,6 +1296,29 @@ async function editSmartfonById(id) {
         showNotification('Ошибка загрузки данных смартфона', 'error');
     }
 }
+
+// ============ DUKE MODAL ============
+const dukeButton = document.getElementById('dukeButton');
+const dukeModal = document.getElementById('dukeModal');
+const dukeClose = document.querySelector('.duke-modal-close');
+
+if (dukeButton) {
+    dukeButton.addEventListener('click', () => {
+        dukeModal.style.display = 'block';
+    });
+}
+
+if (dukeClose) {
+    dukeClose.addEventListener('click', () => {
+        dukeModal.style.display = 'none';
+    });
+}
+
+window.addEventListener('click', (event) => {
+    if (event.target === dukeModal) {
+        dukeModal.style.display = 'none';
+    }
+});
 
 // Глобальные функции
 window.callMethod = callMethod;

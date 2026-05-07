@@ -3,6 +3,8 @@ package org.example.WebAPI.Controllers;
 import org.example.AppDataAPI.TechnicService;
 import org.example.Class.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +14,7 @@ import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/computer")
+@Transactional
 public class ComputerController {
 
     @Autowired
@@ -31,7 +34,7 @@ public class ComputerController {
     @GetMapping("/{id}")
     public ResponseEntity<Computer> getComputerById(@PathVariable Long id) {
         try {
-            Technic technic = technicService.getById(id);
+            Technic technic = technicService.getEntityManager().find(Technic.class, id);
             if (technic instanceof Computer) {
                 return ResponseEntity.ok((Computer) technic);
             } else {
@@ -43,11 +46,11 @@ public class ComputerController {
         }
     }
 
-    // PATCH - частичное обновление компьютера
     @PatchMapping("/{id}")
     public ResponseEntity<Map<String, Object>> patchUpdate(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
         try {
-            Computer computer = technicService.getComputerById(id);
+            Technic technic = technicService.getEntityManager().find(Technic.class, id);
+            Computer computer = (technic instanceof Computer) ? (Computer) technic : null;
             if (computer == null) {
                 return ResponseEntity.notFound().build();
             }
@@ -76,7 +79,7 @@ public class ComputerController {
             }
             if (updates.containsKey("shopId")) {
                 Long shopId = updates.get("shopId") != null ? ((Number) updates.get("shopId")).longValue() : null;
-                ComputerShop shop = shopId != null ? technicService.getShopById(shopId) : null;
+                ComputerShop shop = shopId != null ? technicService.getComputerShopRepository().findById(shopId).orElse(null) : null;
                 computer.setShop(shop);
                 response.put("shopId", shopId);
             }
@@ -99,7 +102,8 @@ public class ComputerController {
             Map<String, Object> methodInfoMap = (Map<String, Object>) request.get("methodInfo");
             String methodName = (String) methodInfoMap.get("methodName");
 
-            Computer computer = technicService.getComputerById(id);
+            Technic technic = technicService.getEntityManager().find(Technic.class, id);
+            Computer computer = (technic instanceof Computer) ? (Computer) technic : null;
             Map<String, Object> response = new HashMap<>();
 
             switch (methodName) {
@@ -135,7 +139,8 @@ public class ComputerController {
             Long id = ((Number) request.get("id")).longValue();
             String newProcessor = (String) request.get("newProcessor");
 
-            Computer computer = technicService.getComputerById(id);
+            Technic technic = technicService.getEntityManager().find(Technic.class, id);
+            Computer computer = (technic instanceof Computer) ? (Computer) technic : null;
             boolean success = computer.upgradeProcessor(newProcessor);
             if (success) {
                 technicService.update(computer);
@@ -155,7 +160,8 @@ public class ComputerController {
             Long id = ((Number) request.get("id")).longValue();
             int newRam = ((Number) request.get("newRam")).intValue();
 
-            Computer computer = technicService.getComputerById(id);
+            Technic technic = technicService.getEntityManager().find(Technic.class, id);
+            Computer computer = (technic instanceof Computer) ? (Computer) technic : null;
             boolean success = computer.changeRam(newRam);
             if (success) {
                 technicService.update(computer);
@@ -187,7 +193,7 @@ public class ComputerController {
             String modelProcessor = (String) data.get("modelProcessor");
             int ram = ((Number) data.get("ram")).intValue();
             Long shopId = data.get("shopId") != null ? ((Number) data.get("shopId")).longValue() : null;
-            ComputerShop shop = shopId != null ? technicService.getShopById(shopId) : null;
+            ComputerShop shop = shopId != null ? technicService.getComputerShopRepository().findById(shopId).orElse(null) : null;
             Computer computer = new Computer(name, modelProcessor, ram, shop);
             technicService.createComputer(computer);
             return ResponseEntity.status(HttpStatus.CREATED).body(computer);
@@ -205,7 +211,7 @@ public class ComputerController {
             String modelProcessor = (String) data.get("modelProcessor");
             int ram = ((Number) data.get("ram")).intValue();
             Long shopId = data.get("shopId") != null ? ((Number) data.get("shopId")).longValue() : null;
-            ComputerShop shop = shopId != null ? technicService.getShopById(shopId) : null;
+            ComputerShop shop = shopId != null ? technicService.getComputerShopRepository().findById(shopId).orElse(null): null;
             Computer computer = new Computer(name, country, enabled, modelProcessor, ram, shop);
             technicService.createComputer(computer);
             return ResponseEntity.status(HttpStatus.CREATED).body(computer);
@@ -217,8 +223,9 @@ public class ComputerController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteComputer(@PathVariable Long id) {
         try {
-            Computer existing = technicService.getComputerById(id);
-            if (existing != null) {
+            Technic technic = technicService.getEntityManager().find(Technic.class, id);
+            Computer computer = (technic instanceof Computer) ? (Computer) technic : null;
+            if (computer != null) {
                 technicService.delete(id);
                 return ResponseEntity.noContent().build();
             } else {
