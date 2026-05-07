@@ -14,7 +14,7 @@ public class AppDbContext {
     public static final int DB_PORT = 5432;
     public static final String DB_NAME = "TechnicsJava";
     public static final String DB_USERNAME = "Ershik286";
-    public static final String DB_PASSWORD = "CyberBiba227";
+    public static final String DB_PASSWORD = "*";
 
     // Свойства для Hibernate
     public Properties hibernateProperties() {
