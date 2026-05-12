@@ -34,7 +34,7 @@ public class ShopController {
     }
 
     // GET shop by id
-    @GetMapping("/shop/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ComputerShop> getShopById(@PathVariable Long id) {
         try {
             ComputerShop shop = technicService.getComputerShopRepository().findById(id).orElse(null);
@@ -56,7 +56,6 @@ public class ShopController {
         try {
             ComputerShop shop = new ComputerShop(name);
             technicService.getComputerShopRepository().save(shop);
-
             System.out.println("Создан магазин: " + shop.getName() + " с ID: " + shop.getId());
             return ResponseEntity.status(HttpStatus.CREATED).body(shop);
         } catch (Exception e) {
@@ -83,7 +82,7 @@ public class ShopController {
     }
 
     // DELETE shop
-    @DeleteMapping("/shop/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteShop(@PathVariable Long id) {
         try {
             ComputerShop shop = technicService.getComputerShopRepository().findById(id).orElse(null);
@@ -100,20 +99,18 @@ public class ShopController {
         }
     }
 
-    // GET all technics in specific shop
+    // GET technics in specific shop WITH DETAILS
     @GetMapping("/{shopId}/technics")
-    public ResponseEntity<List<Technic>> getShopTechnics(@PathVariable Long shopId) {
+    public ResponseEntity<List<Map<String, Object>>> getShopTechnics(@PathVariable Long shopId) {
         try {
             ComputerShop shop = technicService.getComputerShopRepository().findById(shopId).orElse(null);
-            List<Technic> technics;
             if (shop != null) {
-                technics = shop.getSaleTechnic();
+                List<Map<String, Object>> result = shop.getSaleTechnicWithDetails();
+                System.out.println("Возвращено техники из магазина " + shopId + ": " + result.size());
+                return ResponseEntity.ok(result);
+            } else {
+                return ResponseEntity.ok(new ArrayList<>());
             }
-            else {
-                technics = new ArrayList<>();
-            }
-            System.out.println("Возвращено техники из магазина " + shopId + ": " + technics.size());
-            return ResponseEntity.ok(technics);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -140,112 +137,6 @@ public class ShopController {
             technicService.removeTechnicFromShop(shopId, technicId);
             System.out.println("Техника " + technicId + " удалена из магазина " + shopId);
             return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    // ============ СУЩЕСТВУЮЩИЕ МЕТОДЫ ДЛЯ ТЕХНИКИ ============
-
-    // GET all technics in shop (все техники из всех магазинов)
-    @GetMapping("/sale_technic")
-    public ResponseEntity<List<Technic>> getAllSaleTechnic() {
-        try {
-            List<Technic> technics = technicService.getTechnicRepository().findAll();
-            System.out.println("Возврат всех данных из таблиц, найдено: " + technics.size());
-            return ResponseEntity.ok(technics);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    // GET by id
-    @GetMapping("/technic/{id}")
-    public ResponseEntity<Technic> getTechnic(@PathVariable Long id) {
-        try {
-            Technic technic = technicService.getEntityManager().find(Technic.class, id);
-            if (technic != null) {
-                System.out.println("Возвращена техника с ID: " + id);
-                return ResponseEntity.ok(technic);
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    // DELETE by id
-    @DeleteMapping("/technic/{id}")
-    public ResponseEntity<Void> deleteTechnic(@PathVariable Long id) {
-        try {
-            Technic existing = technicService.getEntityManager().find(Technic.class, id);
-            if (existing != null) {
-                technicService.delete(id);
-                System.out.println("Удалена техника с ID: " + id);
-                return ResponseEntity.noContent().build();
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    // POST create technic
-    @PostMapping("/technic")
-    public ResponseEntity<Technic> createTechnic(@RequestBody Technic technic) {
-        try {
-            technicService.create(technic);
-            System.out.println("Создана техника: " + technic.getName());
-            return ResponseEntity.status(HttpStatus.CREATED).body(technic);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    // PUT update technic
-    @PutMapping("/technic/{id}")
-    public ResponseEntity<Technic> updateTechnic(@PathVariable Long id, @RequestBody Technic technic) {
-        try {
-            Technic existing = technicService.getEntityManager().find(Technic.class, id);
-            if (existing != null) {
-                technic.setId(id);
-                technicService.update(technic);
-                System.out.println("Обновлена техника с ID: " + id);
-                return ResponseEntity.ok(technic);
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    // GET computers with details
-    @GetMapping("/computers")
-    public ResponseEntity<List<Map<String, Object>>> getComputers() {
-        try {
-            List<Map<String, Object>> computers = technicService.getComputersWithDetails();
-            return ResponseEntity.ok(computers);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    // GET smartphones with details
-    @GetMapping("/smartfons")
-    public ResponseEntity<List<Map<String, Object>>> getSmartfons() {
-        try {
-            List<Map<String, Object>> smartfons = technicService.getSmartfonList();
-            return ResponseEntity.ok(smartfons);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

@@ -6,5 +6,5 @@ import java.util.List;
 
 @Repository
 public interface ComputerShopRepository extends JpaRepository<ComputerShop, Long> {
-    List<ComputerShop> findByName(String name);
+    //List<ComputerShop> findByName(String name);
 }

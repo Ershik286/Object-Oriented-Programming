@@ -132,19 +132,117 @@ function displayShops() {
     const grid = document.getElementById('shopsGrid');
     if (!grid) return;
     if (shops.length === 0) {
-        grid.innerHTML = '<div style="text-align: center; padding: 40px;">Нет созданных магазинов</div>';
+        grid.innerHTML = '<div style="text-align: center; padding: 40px; grid-column: 1/-1;">Нет созданных магазинов</div>';
         return;
     }
-    grid.innerHTML = shops.map(shop => `
+    grid.innerHTML = shops.map(shop => {
+        const technicCount = shop.saleTechnic ? shop.saleTechnic.length : 0;
+        return `
         <div class="shop-card">
             <h4>🏪 ${escapeHtml(shop.name || 'Без названия')}</h4>
-            <p>ID: ${shop.id} | Техники: ${shop.saleTechnic?.length || 0} шт.</p>
+            <p>ID: <strong>${shop.id}</strong> | Техники: <strong>${technicCount} шт.</strong></p>
             <div class="shop-card-buttons">
-                <button class="btn btn-sm btn-warning" onclick="editShop(${shop.id}, '${escapeHtml(shop.name)}')">✏️ Редактировать</button>
+                <button class="btn btn-sm btn-info" onclick="viewShopTechnics(${shop.id}, '${escapeHtml(shop.name || 'Без названия')}')">📋 Показать технику</button>
+                <button class="btn btn-sm btn-warning" onclick="editShop(${shop.id}, '${escapeHtml(shop.name || '')}')">✏️ Редактировать</button>
                 <button class="btn btn-sm btn-danger" onclick="deleteShop(${shop.id})">🗑️ Удалить</button>
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
+}
+
+async function viewShopTechnics(shopId, shopName) {
+    showLoading(true);
+    try {
+        const response = await fetch(`${API_BASE}/shop/${shopId}/technics`);
+        if (!response.ok) throw new Error('Failed to fetch shop technics');
+        const technics = await response.json();
+
+        document.getElementById('shopTechnicsModalTitle').textContent = `📋 Техника в магазине: ${shopName}`;
+
+        const content = document.getElementById('shopTechnicsContent');
+        if (!technics || technics.length === 0) {
+            content.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">В этом магазине пока нет техники</p>';
+        } else {
+            content.innerHTML = `
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Тип</th>
+                                <th>Название</th>
+                                <th>Страна</th>
+                                <th>Включен</th>
+                                <th>Характеристики</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${technics.map(t => {
+                let specs = '';
+                let typeIcon = '📱';
+                if (t.type === 'computer') {
+                    typeIcon = '💻';
+                    specs = `Процессор: ${escapeHtml(t.modelProcessor || '-')}<br>RAM: ${t.ram || '-'} ГБ`;
+                } else if (t.type === 'smartfon') {
+                    typeIcon = '📱';
+                    specs = `Камера: ${t.cameraMP || '-'} МП<br>Производитель: ${escapeHtml(t.manufactures || '-')}<br>Звонок: ${t.isCall ? '📞 Да' : '🔇 Нет'}`;
+                }
+                return `
+                                <tr>
+                                    <td>${t.id || '-'}</td>
+                                    <td>${typeIcon} ${t.type || 'technic'}</td>
+                                    <td>${escapeHtml(t.name || '-')}</td>
+                                    <td>${escapeHtml(t.country || '-')}</td>
+                                    <td>${t.enabled ? '✅ Да' : '❌ Нет'}</td>
+                                    <td>${specs}</td>
+                                    <td class="action-buttons">
+                                        <button class="method-btn" onclick="removeFromShop(${shopId}, ${t.id})">🗑️ Убрать из магазина</button>
+                                    </td>
+                                </tr>
+                                `;
+            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        document.getElementById('shopTechnicsModal').style.display = 'block';
+    } catch (error) {
+        console.error('Error loading shop technics:', error);
+        showNotification('Ошибка загрузки техники магазина', 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+function closeShopTechnicsModal() {
+    document.getElementById('shopTechnicsModal').style.display = 'none';
+}
+
+async function removeFromShop(shopId, technicId) {
+    if (!confirm('Убрать эту технику из магазина?')) return;
+    showLoading(true);
+    try {
+        const response = await fetch(`${API_BASE}/shop/${shopId}/remove-technic/${technicId}`, {
+            method: 'DELETE'
+        });
+        if (!response.ok) throw new Error('Failed to remove technic from shop');
+        showNotification('Техника убрана из магазина', 'success');
+        await loadAllData();
+        // Если модальное окно открыто, обновляем его
+        const modal = document.getElementById('shopTechnicsModal');
+        if (modal.style.display === 'block') {
+            const shopName = document.getElementById('shopTechnicsModalTitle').textContent.replace('📋 Техника в магазине: ', '');
+            await viewShopTechnics(shopId, shopName);
+        }
+    } catch (error) {
+        showNotification('Ошибка удаления техники из магазина', 'error');
+    } finally {
+        showLoading(false);
+    }
 }
 
 async function createShop() {
@@ -198,6 +296,14 @@ async function deleteShop(id) {
         showLoading(false);
     }
 }
+
+// Закрытие по клику на оверлей
+window.addEventListener('click', (event) => {
+    const modal = document.getElementById('shopTechnicsModal');
+    if (event.target === modal) {
+        closeShopTechnicsModal();
+    }
+});
 
 // ============ ТЕХНИКА (БАЗОВАЯ) ============
 async function loadBaseEntities() {

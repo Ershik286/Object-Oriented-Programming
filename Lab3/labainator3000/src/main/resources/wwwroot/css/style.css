@@ -410,6 +410,7 @@ body {
 .shop-card-buttons {
     display: flex;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .btn-sm {
@@ -661,4 +662,31 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Кнопка "Показать технику" */
+.btn-info {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-info:hover {
+    background: #138496;
+}
+
+/* Модальное окно магазина */
+/*#shopTechnicsModal {
+/*    z-index: 2000;
+/*} */
+
+
+
+/* Кнопка "Показать технику" */
+.btn-info {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-info:hover {
+    background: #138496;
 }

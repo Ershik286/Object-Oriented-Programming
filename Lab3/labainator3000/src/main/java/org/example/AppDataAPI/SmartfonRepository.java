@@ -7,6 +7,6 @@ import java.util.List;
 
 @Repository
 public interface SmartfonRepository extends JpaRepository<Smartfon, Long> {
-    List<Smartfon> findByManufactures(String manufactures);
-    List<Smartfon> findByCameraMPGreaterThan(int cameraMP);
+//    List<Smartfon> findByManufactures(String manufactures);
+//    List<Smartfon> findByCameraMPGreaterThan(int cameraMP);
 }

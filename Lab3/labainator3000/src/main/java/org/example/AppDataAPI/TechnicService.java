@@ -36,19 +36,19 @@ public class TechnicService {
         getEntityManager().flush();
     }
 
-    public List<ComputerShop> getAllShops() {
-        return getComputerShopRepository().findAll();
-    }
-
-    public ComputerShop getShopById(Long id) {
-        return getComputerShopRepository().findById(id).orElse(null);
-    }
-
-    public ComputerShop createShop(String name) {
-        ComputerShop shop = new ComputerShop(name);
-        return getComputerShopRepository().save(shop);
-    }
-
+//    public List<ComputerShop> getAllShops() {
+//        return getComputerShopRepository().findAll();
+//    }
+//
+//    public ComputerShop getShopById(Long id) {
+//        return getComputerShopRepository().findById(id).orElse(null);
+//    }
+//
+//    public ComputerShop createShop(String name) {
+//        ComputerShop shop = new ComputerShop(name);
+//        return getComputerShopRepository().save(shop);
+//    }
+//
     public ComputerShop updateShop(Long id, String name) {
         ComputerShop shop = getComputerShopRepository().findById(id).orElse(null);
         if (shop != null) {
@@ -58,25 +58,25 @@ public class TechnicService {
         return null;
     }
 
-    public void deleteShop(Long id) {
-        getComputerShopRepository().deleteById(id);
-    }
+//    public void deleteShop(Long id) {
+//        getComputerShopRepository().deleteById(id);
+//    }
 
-    public List<Technic> getShopTechnics(Long shopId) {
-        ComputerShop shop = getComputerShopRepository().findById(shopId).orElse(null);
-        return shop != null ? shop.getSaleTechnic() : new ArrayList<>();
-    }
+//    public List<Technic> getShopTechnics(Long shopId) {
+//        ComputerShop shop = getComputerShopRepository().findById(shopId).orElse(null);
+//        return shop != null ? shop.getSaleTechnic() : new ArrayList<>();
+//    }
+//
+//    public Computer getComputerById(Long id) {
+//        Technic technic = getEntityManager().find(Technic.class, id);
+//        return (technic instanceof Computer) ? (Computer) technic : null;
+//    }
 
-    public Computer getComputerById(Long id) {
-        Technic technic = getEntityManager().find(Technic.class, id);
-        return (technic instanceof Computer) ? (Computer) technic : null;
-    }
-
-    // Получить Smartfon по ID
-    public Smartfon getSmartfonById(Long id) {
-        Technic technic = getEntityManager().find(Technic.class, id);
-        return (technic instanceof Smartfon) ? (Smartfon) technic : null;
-    }
+//    // Получить Smartfon по ID
+//    public Smartfon getSmartfonById(Long id) {
+//        Technic technic = getEntityManager().find(Technic.class, id);
+//        return (technic instanceof Smartfon) ? (Smartfon) technic : null;
+//    }
 
     public void addExistingTechnicToShop(Long shopId, Long technicId) {
         ComputerShop shop = getComputerShopRepository().findById(shopId).orElse(null);
@@ -169,21 +169,7 @@ public class TechnicService {
 
         for (Computer computer : computers) {
             Map<String, Object> item = new HashMap<>();
-            item.put("id", computer.getId());
-            item.put("modelProcessor", computer.getModelProcessor());
-            item.put("ram", computer.getRam());
-            item.put("technicName", computer.getName());
-            item.put("technicCountry", computer.getCountry());
-
-            ComputerShop shop = computer.getShop();
-            if (shop != null) {
-                item.put("shopId", shop.getId());
-                item.put("shopName", shop.getName());
-            } else {
-                item.put("shopId", null);
-                item.put("shopName", null);
-            }
-
+            item = computer.displayInfo();
             result.add(item);
         }
         return result;
@@ -199,29 +185,7 @@ public class TechnicService {
             System.out.println("DEBUG: Обработка смартфона: " + smartfon.getName());
 
             Map<String, Object> item = new HashMap<>();
-            item.put("id", smartfon.getId());
-            item.put("cameraMP", smartfon.getCameraMP());
-            item.put("manufactures", smartfon.getManufactures());
-            item.put("isCall", smartfon.isCall());
-            item.put("technicName", smartfon.getName());
-            item.put("technicCountry", smartfon.getCountry());
-            item.put("enabled", smartfon.isEnabled());
-
-            // Безопасная проверка shop
-            ComputerShop shop = null;
-            try {
-                shop = smartfon.getShop();
-            } catch (Exception e) {
-                System.out.println("DEBUG: Не удалось получить shop: " + e.getMessage());
-            }
-
-            if (shop != null) {
-                item.put("shopId", shop.getId());
-                item.put("shopName", shop.getName());
-            } else {
-                item.put("shopId", null);
-                item.put("shopName", null);
-            }
+            item = smartfon.displayInfo();
 
             result.add(item);
         }
@@ -237,19 +201,7 @@ public class TechnicService {
 
         for (Technic technic : technics) {
             Map<String, Object> item = new HashMap<>();
-            item.put("id", technic.getId());
-            item.put("name", technic.getName());
-            item.put("country", technic.getCountry());
-            item.put("enabled", technic.isEnabled());
-
-            ComputerShop shop = technic.getShop();
-            if (shop != null) {
-                item.put("shopId", shop.getId());
-                item.put("shopName", shop.getName());
-            } else {
-                item.put("shopId", null);
-                item.put("shopName", null);
-            }
+            item = technic.displayInfo();
 
             result.add(item);
         }

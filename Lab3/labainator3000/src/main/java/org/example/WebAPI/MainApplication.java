@@ -23,7 +23,6 @@ public class MainApplication {
     @Bean
     public CommandLineRunner openBrowser() {
         return args -> {
-            // Небольшая задержка, чтобы сервер успел запуститься
             Thread.sleep(3000);
 
             String url = "http://localhost:8080";

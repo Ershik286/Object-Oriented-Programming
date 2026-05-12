@@ -66,6 +66,19 @@
                 </div>
             </div>
         </section>
+
+        <!-- Модальное окно для просмотра техники магазина -->
+        <div id="shopTechnicsModal" class="modal" style="display: none;">
+            <div class="modal-content" style="max-width: 900px; width: 95%; max-height: 80vh; overflow-y: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 id="shopTechnicsModalTitle">Техника в магазине</h3>
+                    <button onclick="closeShopTechnicsModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+                </div>
+                <div id="shopTechnicsContent">
+                    <!-- Содержимое загружается динамически -->
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- ============ ВКЛАДКА ТЕХНИКИ (ОБЩАЯ) ============ -->
